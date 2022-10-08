@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,9 +19,9 @@ class Node
     public int posY;
 
     //gCost is basic cost to go from one node to the other.
-    public int gCost = 0;
+	public int gCost = int.MaxValue;
     //hCost is a heuristic that estimates the cost of the closest path
-    public int fCost = 0;
+	public int fCost = int.MaxValue;
 
     //Nodes have references to other nodes so it is possible to build a path.
     public Node parent = null;
@@ -52,12 +52,12 @@ public class AStar : MonoBehaviour
     void Start()
     {
         map = new List<string>();
-        map.Add("G-----");
-        map.Add("XXXXX-");
-        map.Add("S-X-X-");
+	    map.Add("------");
+	    map.Add("XXX-XG");
+	    map.Add("--X-XX");
         map.Add("--X-X-");
-        map.Add("--X-X-");
-        map.Add("------");
+	    map.Add("--X-XX");
+	    map.Add("-----S");
 
         //Parse the map
         nodeMap = new Node[MAP_SIZE, MAP_SIZE];
@@ -92,7 +92,13 @@ public class AStar : MonoBehaviour
         //Execute AStar algorithm
         List<Node> nodePath = ExecuteAStar(start, goal);
 
-        //TODO: burn path in the map.
+	    //Burn path in the map
+	    foreach(Node node in nodePath){
+	    	char[] charArray = map[node.posY].ToCharArray();
+	    	charArray[node.posX] = '@';
+	    	map[node.posY] = new string (charArray);
+	    	
+	    }
 
         //print the map
         string mapString = "";
@@ -182,9 +188,18 @@ public class AStar : MonoBehaviour
         return new List<Node>();
     }
 
-    private List<Node> BuildPath(Node goal)
+	//Once all nodes are populated, just read every parent and build the path.
+    private List<Node> BuildPath(Node node)
     {
-        throw new NotImplementedException();
+        List<Node> path = new List<Node>() { node };
+
+        while (node.parent != null)
+        {
+            node = node.parent;
+            path.Add(node);
+        }
+
+        return path;
     }
 
     private List<Node> GetNeighborNodes(Node node)
