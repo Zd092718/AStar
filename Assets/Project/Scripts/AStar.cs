@@ -204,30 +204,42 @@ public class AStar : MonoBehaviour
         // Note that if node is blocked, it cannot be visited.
 
         //Left
-        if (node.posX - 1 >= 0)
+        if (node.value.canMoveLeft && node.posX - 1 >= 0)
         {
             Node candidate = nodeMap[node.posX - 1, node.posY];
-            neighbors.Add(candidate);
+            if (candidate.value.canNavigate)
+            {
+                neighbors.Add(candidate);
+            }
 
         }
         //Right
-        if (node.posX + 1 <= mapWidth - 1)
+        if (node.value.canMoveRight && node.posX + 1 <= mapWidth - 1)
         {
             Node candidate = nodeMap[node.posX + 1, node.posY];
-            neighbors.Add(candidate);
+            if (candidate.value.canNavigate)
+            {
+                neighbors.Add(candidate);
+            }
 
         }
         //Down
-        if (node.posY - 1 >= 0)
+        if (node.value.canMoveUp && node.posY - 1 >= 0)
         {
             Node candidate = nodeMap[node.posX, node.posY - 1];
-            neighbors.Add(candidate);
+            if (candidate.value.canNavigate)
+            {
+                neighbors.Add(candidate);
+            }
         }
         //Up
-        if (node.posY + 1 <= mapHeight - 1)
+        if (node.value.canMoveDown && node.posY + 1 <= mapHeight - 1)
         {
             Node candidate = nodeMap[node.posX, node.posY + 1];
-            neighbors.Add(candidate);
+            if (candidate.value.canNavigate)
+            {
+                neighbors.Add(candidate);
+            }
         }
 
         return neighbors;
