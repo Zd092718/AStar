@@ -5,7 +5,7 @@ using UnityEngine;
 
 //Class that holds information about certain position
 //, so it's used in a pathfinding algorithm.
-class Node
+public class Node
 {
 
     //Nodes have X and Y positions
@@ -13,15 +13,15 @@ class Node
     public int posY;
 
     //gCost is basic cost to go from one node to the other.
-	public int gCost = int.MaxValue;
+    public int gCost = int.MaxValue;
     //hCost is a heuristic that estimates the cost of the closest path
-	public int fCost = int.MaxValue;
+    public int fCost = int.MaxValue;
 
     //Nodes have references to other nodes so it is possible to build a path.
     public Node parent = null;
 
     //Value of the node
-	public NavTile value = null;
+    public NavTile value = null;
 
     //Constructor
     public Node(int posX, int posY)
@@ -32,74 +32,77 @@ class Node
 }
 public class AStar : MonoBehaviour
 {
-	//Public variables
-	public GameObject backgroundContainer;
-	public GameObject player;
-	public GameObject enemy;
+    //Public variables
+    public GameObject backgroundContainer;
+    public GameObject player;
+    public GameObject enemy;
 
-	//Variables
-	private int mapWidth;
-	private int mapHeight;
+    //Variables
+    private int mapWidth;
+    private int mapHeight;
     private Node[,] nodeMap;
 
-    // Start is called before the first frame update
-    void Start()
-	{
-		//Preload values.
-		mapHeight = backgroundContainer.transform.childCount;
-		mapWidth = backgroundContainer.transform.GetChild(0).childCount;
-		
-		//Parse the map
-		nodeMap = new Node[mapWidth, mapHeight];
-		Node start = null;
-		Node goal = null;
-		
-		for (int y = 0; y < backgroundContainer.transform.childCount; y++) {
-			Transform backgroundRow = backgroundContainer.transform.GetChild(y);
-			
-			for (int x = 0; x < backgroundRow.transform.childCount; x++) {
-				NavTile tile = backgroundRow.GetChild(x).GetComponent<NavTile>();
-				
-				Node node = new Node(x, y);
-				node.value = tile;
-				nodeMap[x, y] = node;
-			}
-		}
-		
-		start = FindNode(player);
-		goal = FindNode(enemy);
-		
-		Debug.Log("Player is on " + start.posX + "," + start.posY);
-		Debug.Log("Enemy is on " + goal.posX + "," + goal.posY);
+    public List<Node> FindPath()
+    {
+        //Preload values.
+        mapHeight = backgroundContainer.transform.childCount;
+        mapWidth = backgroundContainer.transform.GetChild(0).childCount;
 
+        //Parse the map
+        nodeMap = new Node[mapWidth, mapHeight];
+        Node start = null;
+        Node goal = null;
 
-        
+        for (int y = 0; y < backgroundContainer.transform.childCount; y++)
+        {
+            Transform backgroundRow = backgroundContainer.transform.GetChild(y);
+
+            for (int x = 0; x < backgroundRow.transform.childCount; x++)
+            {
+                NavTile tile = backgroundRow.GetChild(x).GetComponent<NavTile>();
+
+                Node node = new Node(x, y);
+                node.value = tile;
+                nodeMap[x, y] = node;
+            }
+        }
+
+        start = FindNode(player);
+        goal = FindNode(enemy);
+
         //Execute AStar algorithm
-		//List<Node> nodePath = ExecuteAStar(start, goal);
+        List<Node> nodePath = ExecuteAStar(start, goal);
+        nodePath.Reverse();
+        return nodePath;
+    }
 
-	}
-    
-	private Node FindNode(GameObject obj){
-		Collider2D[] collidingObjects = Physics2D.OverlapCircleAll(obj.transform.position, 0.2f);
-		foreach(Collider2D collidingObject in collidingObjects){
-			if(collidingObject.gameObject.GetComponent<NavTile>() != null){
-				// This is the tile the object is on
-				NavTile tile = collidingObject.gameObject.GetComponent<NavTile>();
-				
-				//Find the node which contains the tile
-				for(int y = 0; y < mapHeight; y++){
-					for(int x = 0; x < mapWidth; x++){
-						Node node = nodeMap[x, y];
-						if(node.value == tile){
-							return node;
-						}
-					}
-				}
-			}
-		}
-		
-		return null;
-	}
+    private Node FindNode(GameObject obj)
+    {
+        Collider2D[] collidingObjects = Physics2D.OverlapCircleAll(obj.transform.position, 0.2f);
+        foreach (Collider2D collidingObject in collidingObjects)
+        {
+            if (collidingObject.gameObject.GetComponent<NavTile>() != null)
+            {
+                // This is the tile the object is on
+                NavTile tile = collidingObject.gameObject.GetComponent<NavTile>();
+
+                //Find the node which contains the tile
+                for (int y = 0; y < mapHeight; y++)
+                {
+                    for (int x = 0; x < mapWidth; x++)
+                    {
+                        Node node = nodeMap[x, y];
+                        if (node.value == tile)
+                        {
+                            return node;
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
 
     private List<Node> ExecuteAStar(Node start, Node goal)
     {
@@ -178,7 +181,7 @@ public class AStar : MonoBehaviour
         return new List<Node>();
     }
 
-	//Once all nodes are populated, just read every parent and build the path.
+    //Once all nodes are populated, just read every parent and build the path.
     private List<Node> BuildPath(Node node)
     {
         List<Node> path = new List<Node>() { node };
@@ -204,23 +207,27 @@ public class AStar : MonoBehaviour
         if (node.posX - 1 >= 0)
         {
             Node candidate = nodeMap[node.posX - 1, node.posY];
+            neighbors.Add(candidate);
 
         }
         //Right
-	    if (node.posX + 1 <= mapWidth - 1)
+        if (node.posX + 1 <= mapWidth - 1)
         {
             Node candidate = nodeMap[node.posX + 1, node.posY];
+            neighbors.Add(candidate);
 
         }
         //Down
         if (node.posY - 1 >= 0)
         {
             Node candidate = nodeMap[node.posX, node.posY - 1];
+            neighbors.Add(candidate);
         }
         //Up
-	    if (node.posY + 1 <= mapHeight - 1)
+        if (node.posY + 1 <= mapHeight - 1)
         {
             Node candidate = nodeMap[node.posX, node.posY + 1];
+            neighbors.Add(candidate);
         }
 
         return neighbors;
@@ -232,4 +239,6 @@ public class AStar : MonoBehaviour
     {
         return Mathf.Abs(node1.posX - node2.posX) + Mathf.Abs(node1.posY - node2.posY);
     }
+
+
 }
