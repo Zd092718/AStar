@@ -8,6 +8,7 @@ public class MoveableObject : MonoBehaviour
 
     private List<Node> currentPath;
     private Node targetNode;
+    private Quaternion targetRotation;
     // Start is called before the first frame update
     void Start()
     {
@@ -29,6 +30,11 @@ public class MoveableObject : MonoBehaviour
         {
             Vector3 direction = (targetNode.value.transform.position - transform.position).normalized;
             transform.position += direction * speed * Time.deltaTime;
+
+            float angle = Mathf.Atan2(direction.y, direction.x);
+            targetRotation = Quaternion.Euler(0, 0, 90 + angle * Mathf.Rad2Deg);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+
             if (Vector3.Distance(transform.position, targetNode.value.transform.position) < 0.01f)
             {
                 transform.position = targetNode.value.transform.position;
